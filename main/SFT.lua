@@ -1,0 +1,2 @@
+--This file is just a placeholder for now
+--This will eventually be used to make SFT programs written for the scratch-based version of ClOS compatible with this version
