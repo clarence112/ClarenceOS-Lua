@@ -2,7 +2,7 @@
 -- Developed under Macrosaft WinDOS (Microsoft Windows)
 -- Will hopefully run on other OSes
 
--- Version 0.0.2
+-- Version 0.0.3
 
 -- Created by Clarence Pacelli (clarence112)
 
@@ -21,7 +21,7 @@ os = require("os")
 
 -- var setup
 restart = 1
-osver = "vanilla 0.0.2" --OS version
+osver = "vanilla 0.0.3" --OS version
 installedcommands = {}
 installeduis = {}
 comsuccess = 0
@@ -39,7 +39,7 @@ end
 --main command infastructure
 function command(cominput)
 
-	comsuccess = 0 --set command sucsess check var
+	comsuccess = 0 --command sucsess check var
 
 	compassthrough = cominput
 	for i,line in ipairs(installedcommands) do --run any user-installed commands
@@ -48,7 +48,7 @@ function command(cominput)
 		end
     end
 
-	if cominput[1] == "lala" then --easter egg
+	if cominput[1] == "lala" then --OG test command
 		print("'tis a test")
 		comsuccess = 1
 	end
@@ -60,7 +60,7 @@ function command(cominput)
 		restart = 0
 	end
 
-	if cominput[1] == "help" then --command help
+	if cominput[1] == "help" then
 		comsuccess = 1
 		print("choose a catigory (1-3)")
 		print(" ")
@@ -85,11 +85,12 @@ function command(cominput)
 		end
 		if cominput[1] == "3" then
 			print("Utillity commands:")
-			print("	clear - clears the screen")
-			print("	fileload - loads a file")
-			print("	fileprint - prints the userdata of the loaded file")
-			print("	filerun - runs the loaded file")
-			print("	installed - lists installed programs")
+			print("	clear........clears the screen")
+			print("	fileload.....loads a file")
+			print("	fileprint....prints the userdata of the loaded file")
+			print("	filerun......runs the loaded file")
+			print("	fileunload...unloads the loaded file")
+			print("	installed....lists installed programs")
 		end
 	end
 
@@ -135,8 +136,8 @@ function command(cominput)
 	end
 
 	if cominput[1] == "filerun" then --run loaded file (lua programs only)
-		local fileext = mysplit(loadedfilepath, ".")
 		if (loadedfile) then
+		local fileext = mysplit(loadedfilepath, ".")
 			if fileext[2] == "lua" then
 				installcheck = 1
 				dofile(loadedfilepath)
@@ -159,6 +160,13 @@ function command(cominput)
 		for i,line in ipairs(installedcommands) do --run any user-installed commands
 			print(line)
     	end
+	end
+
+	if cominput[1] == "fileunload" then
+		loadedfile = nil
+		loadedfilepath = nil
+		comsuccess = 1
+		print("Unloaded file, if any.")
 	end
 
 	if comsuccess == 0 then --check to see of the command was sucsessful
@@ -207,7 +215,7 @@ end
 file:close()
 end
 
--- save the list of installed commands
+-- save the list of installed UIs
 function saveuilist()
 file = io.open("UIs.txt", "w")
 file:write("")
@@ -227,4 +235,3 @@ while restart == 1 do
 end
 
 saveinstalllist() -- save installed commands before quitting
-

@@ -2,7 +2,7 @@ ClOS Lua adaptation
 Developed under Microsoft Windows
 Will hopefully run on other OSes
 
-Version 0.0.2
+Version 0.0.3
 
 Created by Clarence Pacelli (clarence112)
 
