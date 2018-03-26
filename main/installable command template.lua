@@ -4,11 +4,14 @@ if (compassthrough) then
 		print("installed template")
 	else
 		--put your code here
-		--the global var "answer" will hold the last string input by the user
+		--the global array "compassthrough" will hold the last string input by the user, separated at every space
 		--make sure to include "return(1)" in your commands!
 		--
 		--Example code:
-			if compassthrough[1] == "test" then
+			if (chhelp) then
+				print("Installable Command Template:")
+				print("	test")
+			elseif compassthrough[1] == "test" then
 				print("the test was a succsess!")
 				return(1) --tells ClOS that the command worked
 			end

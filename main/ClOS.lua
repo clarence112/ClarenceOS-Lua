@@ -1,5 +1,5 @@
 -- ClOS Lua adaptation
--- Developed under Macrosaft WinDOS (Microsoft Windows)
+-- Developed under Microsoft Windows
 -- Will hopefully run on other OSes
 
 -- Version 0.0.3
@@ -11,20 +11,27 @@
 --    you CAN'T use this code for commercial purposes, or change the licence
 
 --If you came here from the scratch based version of ClOS, welcome!
---greetings to future crew (yes this is nessicary)
+--greetings to future crew (yes this is necessary)
 
 
 
 --declare dependencies
 io = require("io")
 os = require("os")
+lfs = require("lfs")
 
 -- var setup
 restart = 1
-osver = "vanilla 0.0.3" --OS version
+osver = "vanilla 0.0.4" --OS version
 installedcommands = {}
 installeduis = {}
 comsuccess = 0
+root = lfs.currentdir()
+if string.sub(root, 1, 1) == "/" then
+	hosttype = "unixlike"
+else
+	hosttype = "microsoft"
+end
 
 --load installed commands
 for line in io.lines("installedprograms.txt") do
@@ -62,15 +69,16 @@ function command(cominput)
 
 	if cominput[1] == "help" then
 		comsuccess = 1
-		print("choose a catigory (1-3)")
+		print("choose a catigory (1-4)")
 		print(" ")
 		print("1: power")
 		print("2: easter eggs")
 		print("3: utillity")
+		print("4: installed")
 		io.write("help > ")
 		io.flush()
-		cominput[1] = io.read()
-		if cominput[1] == "1" then
+		cominput[2] = io.read()
+		if cominput[2] == "1" then
 			print("close ClOS:")
 			print("	quit")
 			print("	logout")
@@ -78,12 +86,10 @@ function command(cominput)
 			print("	shutdown")
 			print("restart ClOS:")
 			print("	restart")
-		end
-		if cominput[1] == "2" then
+		elseif cominput[2] == "2" then
 			print("easter egg commands:")
 			print("	lala")
-		end
-		if cominput[1] == "3" then
+		elseif cominput[2] == "3" then
 			print("Utillity commands:")
 			print("	clear........clears the screen")
 			print("	fileload.....loads a file")
@@ -91,6 +97,12 @@ function command(cominput)
 			print("	filerun......runs the loaded file")
 			print("	fileunload...unloads the loaded file")
 			print("	installed....lists installed programs")
+		elseif cominput[2] == "4" then
+			chhelp = 1
+			for i,line in ipairs(installedcommands) do
+				dofile(line)
+			end
+			chhelp = nil
 		end
 	end
 
@@ -102,13 +114,22 @@ function command(cominput)
 
 	if cominput[1] == "clear" then --clear the screen
 		comsuccess = 1
-		os.execute("CLS")
+		if hosttype == "microsoft" then
+			os.execute("CLS")
+		else
+			os.execute("clear")
+		end
 	end
 
 	if cominput[1] == "fileload" then --load a file
 		comsuccess = 1
 		if table.getn(cominput) == 2 then
-			loadedfile = io.open(cominput[2])
+			if table.getn(mysplit(cominput[2], "/")) > 1 or table.getn(mysplit(cominput[2], "\\")) > 1 then
+				loadedfile = io.open(cominput[2])
+			else
+				loadedfile = io.open(lfs.currentdir() .. "\\" .. cominput[2])
+				cominput[2] = lfs.currentdir() .. "\\" .. cominput[2]
+			end
 		elseif table.getn(cominput) == 1 then
 			io.write("fileload > ")
 			io.flush()
@@ -138,13 +159,13 @@ function command(cominput)
 	if cominput[1] == "filerun" then --run loaded file (lua programs only)
 		if (loadedfile) then
 		local fileext = mysplit(loadedfilepath, ".")
-			if fileext[2] == "lua" then
+			if fileext[#fileext] == "lua" then
 				installcheck = 1
 				dofile(loadedfilepath)
 				installcheck = 0
-			elseif fileext[2] == "clsh" then
+			elseif fileext[#fileext] == "clsh" then
 				print("CLSH files do not work right now")
-			elseif fileext[2] == "sft" then
+			elseif fileext[#fileext] == "sft" then
 				print("SFT files do not work right now")
 			else
 				print("Error: loaded file is not a .lua, .clsh, or .sft file and cannot be run.")
@@ -170,7 +191,7 @@ function command(cominput)
 	end
 
 	if comsuccess == 0 then --check to see of the command was sucsessful
-		print("Unknown command:", cominput[1])
+		print("Unknown command: " .. cominput[1])
 	end
 
 end
@@ -193,11 +214,13 @@ local function advmode()
 print("*** STARTING CLOS IN TERMINAL MODE ***")
 print("Begin sys info collection")
 print("OS version:", osver)
+print("Host OS type:", hosttype)
 print("Lua version:", _VERSION, "Built for: Lua 5.1")
+print("root dir:" , root)
 print(" ")
 print("This is a BETA VERSION, don't expect things to run smoothly.")
 while clspgm == 0 do
-	io.write("ClOS > ")
+	io.write("ClOS@" .. lfs.currentdir() .. " >")
 	io.flush()
 	command(mysplit(io.read(), " "))
 end
@@ -230,8 +253,13 @@ end
 -- bootloader screen will go here once I figure out how to render GUIs, for now it's hardcoded to go to advanced mode
 while restart == 1 do
 	clspgm = 0
-	os.execute("CLS")
+	if hosttype == "microsoft" then
+		os.execute("CLS")
+	else
+		os.execute("clear")
+	end
 	advmode()
+	lfs.chdir(root)
 end
 
 saveinstalllist() -- save installed commands before quitting
