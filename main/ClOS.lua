@@ -1,8 +1,8 @@
 -- ClOS Lua adaptation
--- Developed under Microsoft Windows
+-- Developed under Microsoft Windows and Ubuntu 16.04
 -- Will hopefully run on other OSes
 
--- Version 0.0.3
+-- Version 0.0.5
 
 -- Created by Clarence Pacelli (clarence112)
 
@@ -22,15 +22,17 @@ lfs = require("lfs")
 
 -- var setup
 restart = 1
-osver = "vanilla 0.0.4" --OS version
+osver = "vanilla 0.0.5" --OS version
 installedcommands = {}
 installeduis = {}
 comsuccess = 0
 root = lfs.currentdir()
 if string.sub(root, 1, 1) == "/" then
 	hosttype = "unixlike"
+	slashtype = "/"
 else
 	hosttype = "microsoft"
+	slashtype = "\\"
 end
 
 --load installed commands
@@ -127,23 +129,28 @@ function command(cominput)
 			if table.getn(mysplit(cominput[2], "/")) > 1 or table.getn(mysplit(cominput[2], "\\")) > 1 then
 				loadedfile = io.open(cominput[2])
 			else
-				loadedfile = io.open(lfs.currentdir() .. "\\" .. cominput[2])
-				cominput[2] = lfs.currentdir() .. "\\" .. cominput[2]
+				loadedfile = io.open(lfs.currentdir() .. slashtype .. cominput[2])
+				cominput[2] = lfs.currentdir() .. slashtype .. cominput[2]
 			end
 		elseif table.getn(cominput) == 1 then
 			io.write("fileload > ")
 			io.flush()
 			cominput[2] = io.read()
-			loadedfile = io.open(cominput[2])
+			if table.getn(mysplit(cominput[2], "/")) > 1 or table.getn(mysplit(cominput[2], "\\")) > 1 then
+				loadedfile = io.open(cominput[2])
+			else
+				loadedfile = io.open(lfs.currentdir() .. slashtype .. cominput[2])
+				cominput[2] = lfs.currentdir() .. slashtype .. cominput[2]
+			end
 		end
 
 		if (loadedfile) then
-			print("Load succsessful")
 			loadedfilepath = cominput[2]
+			print("Load succsessful: " .. loadedfilepath)
 		elseif table.getn(cominput) > 2 then
 			print("Error: Too many arguments. If the file path has spaces, try running fileload without any arguments.")
 		else
-			print("File not found")
+			print("File not found: " .. cominput[2])
 		end
 	end
 
@@ -191,7 +198,9 @@ function command(cominput)
 	end
 
 	if comsuccess == 0 then --check to see of the command was sucsessful
-		print("Unknown command: " .. cominput[1])
+		if (cominput[1]) then
+			print("Unknown command: " .. cominput[1])
+		end
 	end
 
 end
@@ -219,6 +228,21 @@ print("Lua version:", _VERSION, "Built for: Lua 5.1")
 print("root dir:" , root)
 print(" ")
 print("This is a BETA VERSION, don't expect things to run smoothly.")
+
+--if hosttype == "unixlike" then
+--	io.popen("cvlc -q --play-and-exit " .. root .. slashtype .. "logon.wav"):close()
+--end
+
+vcheck = _VERSION
+
+if not (_VERSION == "Lua 5.1") then
+	print(" ")
+	print("Error: ClOS is currently incompatible with lua versions other than 5.1")
+	print(" ")
+	restart = 0
+	clspgm = 1
+end
+
 while clspgm == 0 do
 	io.write("ClOS@" .. lfs.currentdir() .. " >")
 	io.flush()
@@ -261,5 +285,9 @@ while restart == 1 do
 	advmode()
 	lfs.chdir(root)
 end
+
+--if hosttype == "unixlike" then
+--	io.popen("cvlc -q --play-and-exit " .. root .. slashtype .. "logoff.wav"):close()
+--end
 
 saveinstalllist() -- save installed commands before quitting
